@@ -13,3 +13,15 @@ export class CreateNewPricingPlanDto {
   @ArrayMinSize(1)
   planFeatures: string[];
 }
+
+export class EditNewPricingPlanDto {
+  @IsOptional()
+  name: string;
+
+  @IsOptional()
+  @IsInt()
+  price: number;
+
+  @IsOptional()
+  planFeatures: string[];
+}

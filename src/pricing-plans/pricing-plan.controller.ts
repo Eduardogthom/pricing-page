@@ -5,11 +5,15 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Res,
   ValidationPipe,
 } from '@nestjs/common';
-import { CreateNewPricingPlanDto } from './pricing-plan.dto';
+import {
+  CreateNewPricingPlanDto,
+  EditNewPricingPlanDto,
+} from './pricing-plan.dto';
 import { PricingPlan } from './pricing-plan.entity';
 
 import { PricingPlanService } from './pricing-plan.service';
@@ -22,11 +26,24 @@ export class PricingPlanController {
   async createPricingPlan(
     @Body(ValidationPipe) createNewPricingPlanDto: CreateNewPricingPlanDto,
   ) {
-    return this.pricingPlanService.createPricingPlan(createNewPricingPlanDto);
+    return await this.pricingPlanService.createPricingPlan(
+      createNewPricingPlanDto,
+    );
   }
 
   @Delete(':planId')
   async deletePlan(@Param('planId') planId: number) {
-    return this.pricingPlanService.deletePlan(planId);
+    return await this.pricingPlanService.deletePlan(planId);
+  }
+
+  @Patch('edit/:planId')
+  async editPricingPlan(
+    @Param('planId') planId: number,
+    @Body(ValidationPipe) editNewPricingPlanDto: EditNewPricingPlanDto,
+  ) {
+    return await this.pricingPlanService.editPricingPlan(
+      planId,
+      editNewPricingPlanDto,
+    );
   }
 }
