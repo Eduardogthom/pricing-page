@@ -1,12 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
   Post,
   Res,
+  ValidationPipe,
 } from '@nestjs/common';
+import { CreateNewPricingPlanDto } from './pricing-plan.dto';
 import { PricingPlan } from './pricing-plan.entity';
 
 import { PricingPlanService } from './pricing-plan.service';
@@ -16,28 +19,14 @@ export class PricingPlanController {
   constructor(private readonly pricingPlanService: PricingPlanService) {}
 
   @Post()
-  async createPricingPlan(@Res() response, @Body() pricingPlan: PricingPlan) {
-    const newPricingPlan = await this.pricingPlanService.createPricingPlan(
-      pricingPlan,
-    );
-    return response.status(HttpStatus.CREATED).json({
-      newPricingPlan,
-    });
+  async createPricingPlan(
+    @Body(ValidationPipe) createNewPricingPlanDto: CreateNewPricingPlanDto,
+  ) {
+    return this.pricingPlanService.createPricingPlan(createNewPricingPlanDto);
   }
 
-  @Get()
-  async fetchAll(@Res() response) {
-    const pricingPlans = await this.pricingPlanService.findAll();
-    return response.status(HttpStatus.OK).json({
-      pricingPlans,
-    });
+  @Delete(':planId')
+  async deletePlan(@Param('planId') planId: number) {
+    return this.pricingPlanService.deletePlan(planId);
   }
-
-  // @Get('/:id')
-  // async findById(@Res() response, @Param('id') id) {
-  //     const book = await this.pricingPlanService.findOne(id);
-  //     return response.status(HttpStatus.OK).json({
-  //         book
-  //     })
-  // }
 }

@@ -1,4 +1,4 @@
-export enum PlanOrders {
+export enum PlanOrderEnum {
   FIRST = 'first',
   SECOND = 'second',
   THIRD = 'third',

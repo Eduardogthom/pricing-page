@@ -5,8 +5,10 @@ import {
   BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
-import { PlanOrders } from './pricing-plan.enums';
+import { PlanFeatures } from './plan-features/plan-features.entity';
+import { PlanOrderEnum } from './pricing-plan.enums';
 
 @Entity()
 export class PricingPlan extends BaseEntity {
@@ -17,14 +19,13 @@ export class PricingPlan extends BaseEntity {
   name: string;
 
   @Column()
-  price: string;
+  price: number;
 
-  @Column({
-    type: 'enum',
-    enum: PlanOrders,
-    default: PlanOrders.LAST,
-  })
-  planOrder: PlanOrders;
+  @Column({ default: 0 })
+  planOrder: number;
+
+  @OneToMany(() => PlanFeatures, (feature) => feature.pricingPlan)
+  features: PlanFeatures[];
 
   @Column()
   @CreateDateColumn()
