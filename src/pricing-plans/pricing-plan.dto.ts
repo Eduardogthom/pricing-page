@@ -24,3 +24,9 @@ export class EditNewPricingPlanDto {
   @IsOptional()
   planFeatures: string[];
 }
+
+export class CreatePlanFeaturesDto {
+  @IsNotEmpty()
+  @ArrayMinSize(1)
+  features: string[];
+}

@@ -10,8 +10,10 @@ import {
   Res,
   ValidationPipe,
 } from '@nestjs/common';
+import { PlanFeaturesService } from './plan-features/plan-features.service';
 import {
   CreateNewPricingPlanDto,
+  CreatePlanFeaturesDto,
   EditNewPricingPlanDto,
 } from './pricing-plan.dto';
 import { PricingPlan } from './pricing-plan.entity';
@@ -20,7 +22,10 @@ import { PricingPlanService } from './pricing-plan.service';
 
 @Controller('pricing-plans')
 export class PricingPlanController {
-  constructor(private readonly pricingPlanService: PricingPlanService) {}
+  constructor(
+    private readonly pricingPlanService: PricingPlanService,
+    private readonly planFeaturesService: PlanFeaturesService,
+  ) {}
 
   @Post()
   async createPricingPlan(
@@ -55,5 +60,16 @@ export class PricingPlanController {
   @Get('/:planId')
   async getSinglePlan(@Param('planId') planId: number) {
     return await this.pricingPlanService.getSinglePlan(planId);
+  }
+
+  @Post('/features/:planId')
+  async createPlanFeatures(
+    @Param('planId') planId: number,
+    @Body(ValidationPipe) createPlanFeaturesDto: CreatePlanFeaturesDto,
+  ) {
+    return await this.planFeaturesService.createPlanFeatures(
+      planId,
+      createPlanFeaturesDto,
+    );
   }
 }
