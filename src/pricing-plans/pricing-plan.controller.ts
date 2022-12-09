@@ -15,6 +15,7 @@ import {
   CreateNewPricingPlanDto,
   CreatePlanFeaturesDto,
   EditNewPricingPlanDto,
+  EditPlanFeaturesDto,
 } from './pricing-plan.dto';
 import { PricingPlan } from './pricing-plan.entity';
 
@@ -71,5 +72,12 @@ export class PricingPlanController {
       planId,
       createPlanFeaturesDto,
     );
+  }
+
+  @Patch('/features/edit/')
+  async editPlanFeatures(
+    @Body(ValidationPipe) editPlanFeaturesDto: EditPlanFeaturesDto,
+  ) {
+    return await this.planFeaturesService.editPlanFeatures(editPlanFeaturesDto);
   }
 }

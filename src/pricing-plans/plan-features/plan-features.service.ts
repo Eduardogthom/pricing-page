@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreatePlanFeaturesDto } from '../pricing-plan.dto';
+import {
+  CreatePlanFeaturesDto,
+  EditPlanFeaturesDto,
+} from '../pricing-plan.dto';
 import { PricingPlan } from '../pricing-plan.entity';
 import { PlanFeatures } from './plan-features.entity';
 
@@ -51,5 +54,32 @@ export class PlanFeaturesService {
     });
 
     return newFeatures;
+  }
+
+  async editPlanFeatures(body: EditPlanFeaturesDto): Promise<PlanFeatures[]> {
+    const { features } = body;
+
+    let editedFeatures: PlanFeatures[] = [];
+
+    for (const feature of features) {
+      const toBeEdited = await this.planFeaturesRepository.findOne({
+        where: { id: feature.featureId },
+      });
+
+      if (!toBeEdited) continue;
+
+      toBeEdited.feature = feature.featureName;
+
+      editedFeatures.push(toBeEdited);
+      await toBeEdited.save();
+    }
+
+    if (editedFeatures.length === 0) {
+      throw new NotFoundException(
+        `Any of those plans were found, nothing has changed in the database`,
+      );
+    }
+
+    return editedFeatures;
   }
 }

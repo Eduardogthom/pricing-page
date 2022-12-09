@@ -1,4 +1,5 @@
 import { ArrayMinSize, IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import { EditPlanArray } from './plan-features/plan-features.interface';
 
 export class CreateNewPricingPlanDto {
   @IsNotEmpty()
@@ -29,4 +30,10 @@ export class CreatePlanFeaturesDto {
   @IsNotEmpty()
   @ArrayMinSize(1)
   features: string[];
+}
+
+export class EditPlanFeaturesDto {
+  @IsNotEmpty()
+  @ArrayMinSize(1)
+  features: EditPlanArray[];
 }
