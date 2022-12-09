@@ -153,4 +153,31 @@ export class PricingPlanService {
 
     return planWithFeatures;
   }
+
+  async getAllPlans(): Promise<PricingPlan[]> {
+    const pricingPlans = await this.pricingPlanRepository.find({
+      relations: ['features', 'discount'],
+    });
+
+    if (!pricingPlans) {
+      throw new NotFoundException(`There is no plans in the database`);
+    }
+
+    return pricingPlans;
+  }
+
+  async getSinglePlan(planId: number): Promise<PricingPlan> {
+    const pricingPlan = await this.pricingPlanRepository.findOne({
+      where: { id: planId },
+      relations: ['features', 'discount'],
+    });
+
+    if (!pricingPlan) {
+      throw new NotFoundException(
+        `There is no Pricing Plan with the id: ${planId} in the database`,
+      );
+    }
+
+    return pricingPlan;
+  }
 }

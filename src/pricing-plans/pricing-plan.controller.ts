@@ -46,4 +46,14 @@ export class PricingPlanController {
       editNewPricingPlanDto,
     );
   }
+
+  @Get()
+  async getAllPlans() {
+    return await this.pricingPlanService.getAllPlans();
+  }
+
+  @Get('/:planId')
+  async getSinglePlan(@Param('planId') planId: number) {
+    return await this.pricingPlanService.getSinglePlan(planId);
+  }
 }
