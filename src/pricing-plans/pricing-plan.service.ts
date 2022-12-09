@@ -94,6 +94,16 @@ export class PricingPlanService {
     }
 
     await this.pricingPlanRepository.delete(planId);
+
+    const allPlans = await this.pricingPlanRepository.find({
+      order: { planOrder: 'ASC' },
+    });
+
+    for (const [index, plan] of allPlans.entries()) {
+      plan.planOrder = index + 1;
+      await plan.save();
+    }
+
     return `The plan: ${pricingPlan.name}, was successfully deleted`;
   }
 
