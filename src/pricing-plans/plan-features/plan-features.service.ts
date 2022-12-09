@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
+  ChangeOrderDto,
   CreatePlanFeaturesDto,
   EditPlanFeaturesDto,
 } from '../pricing-plan.dto';
@@ -107,5 +112,52 @@ export class PlanFeaturesService {
     }
 
     return `The feature: ${planFeature.feature}, was successfully deleted`;
+  }
+
+  async changeFeaturePosition(
+    featureId: number,
+    data: ChangeOrderDto,
+  ): Promise<PlanFeatures> {
+    const { newPosition } = data;
+
+    if (newPosition < 1) {
+      throw new BadRequestException(`The new position must have a valid value`);
+    }
+
+    const feature = await this.planFeaturesRepository.findOne({
+      where: { id: featureId },
+    });
+
+    if (feature.featureOrder === newPosition) {
+      throw new BadRequestException(`The feature is already in this position`);
+    }
+
+    const pricingPlan = await this.pricingPlanRepository
+      .createQueryBuilder('pp')
+      .leftJoinAndSelect('pp.features', 'pf')
+      .where('pp.id = :planId', { planId: feature.pricingPlanId })
+      .orderBy('pf.featureOrder', 'ASC')
+      .getOne();
+
+    let finalPosition =
+      pricingPlan.features[pricingPlan.features.length - 1].featureOrder;
+
+    if (newPosition > finalPosition) {
+      throw new BadRequestException(
+        `The new position is higher than the last position in the database`,
+      );
+    }
+
+    for (const planFeature of pricingPlan.features) {
+      if (planFeature.featureOrder === newPosition) {
+        planFeature.featureOrder = feature.featureOrder;
+        await planFeature.save();
+      }
+    }
+
+    feature.featureOrder = newPosition;
+    await feature.save();
+
+    return feature;
   }
 }

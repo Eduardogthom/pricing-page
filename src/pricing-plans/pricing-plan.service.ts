@@ -8,7 +8,7 @@ import { Discount } from 'src/discount/discount.entity';
 import { Repository } from 'typeorm';
 import { PlanFeatures } from './plan-features/plan-features.entity';
 import {
-  ChangePlanOrderDto,
+  ChangeOrderDto,
   CreateNewPricingPlanDto,
   EditNewPricingPlanDto,
 } from './pricing-plan.dto';
@@ -184,9 +184,13 @@ export class PricingPlanService {
 
   async changePlanPosition(
     planId: number,
-    data: ChangePlanOrderDto,
+    data: ChangeOrderDto,
   ): Promise<PricingPlan> {
     const { newPosition } = data;
+
+    if (newPosition < 1) {
+      throw new BadRequestException(`The new position must have a valid value`);
+    }
 
     const pricingPlans = await this.pricingPlanRepository.find({
       order: { planOrder: 'ASC' },
@@ -207,6 +211,10 @@ export class PricingPlanService {
     const editedOrderPlan = await this.pricingPlanRepository.findOne({
       where: { id: planId },
     });
+
+    if (editedOrderPlan.planOrder === newPosition) {
+      throw new BadRequestException(`The plan is already in this position`);
+    }
 
     for (const pricingPlan of pricingPlans) {
       if (pricingPlan.planOrder === newPosition) {

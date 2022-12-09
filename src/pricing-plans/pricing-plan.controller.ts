@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { PlanFeaturesService } from './plan-features/plan-features.service';
 import {
-  ChangePlanOrderDto,
+  ChangeOrderDto,
   CreateNewPricingPlanDto,
   CreatePlanFeaturesDto,
   EditNewPricingPlanDto,
@@ -88,13 +88,24 @@ export class PricingPlanController {
   }
 
   @Post('/change-order/:planId')
-  async changePlanOrder(
+  async changePlanPosition(
     @Param('planId') planId: number,
-    @Body(ValidationPipe) changePlanOrderDto: ChangePlanOrderDto,
+    @Body(ValidationPipe) ChangeOrderDto: ChangeOrderDto,
   ) {
     return await this.pricingPlanService.changePlanPosition(
       planId,
-      changePlanOrderDto,
+      ChangeOrderDto,
+    );
+  }
+
+  @Post('/feature/change-order/:featureId')
+  async changeFeaturePosition(
+    @Param('featureId') featureId: number,
+    @Body(ValidationPipe) changeFeatureOrderDto: ChangeOrderDto,
+  ) {
+    return await this.planFeaturesService.changeFeaturePosition(
+      featureId,
+      changeFeatureOrderDto,
     );
   }
 }

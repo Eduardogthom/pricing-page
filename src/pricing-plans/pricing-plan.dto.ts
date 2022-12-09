@@ -38,7 +38,7 @@ export class EditPlanFeaturesDto {
   features: EditPlanArray[];
 }
 
-export class ChangePlanOrderDto {
+export class ChangeOrderDto {
   @IsNotEmpty()
   @IsInt()
   newPosition: number;
