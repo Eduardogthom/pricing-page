@@ -37,3 +37,9 @@ export class EditPlanFeaturesDto {
   @ArrayMinSize(1)
   features: EditPlanArray[];
 }
+
+export class ChangePlanOrderDto {
+  @IsNotEmpty()
+  @IsInt()
+  newPosition: number;
+}

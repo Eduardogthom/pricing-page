@@ -8,6 +8,7 @@ import { Discount } from 'src/discount/discount.entity';
 import { Repository } from 'typeorm';
 import { PlanFeatures } from './plan-features/plan-features.entity';
 import {
+  ChangePlanOrderDto,
   CreateNewPricingPlanDto,
   EditNewPricingPlanDto,
 } from './pricing-plan.dto';
@@ -179,5 +180,44 @@ export class PricingPlanService {
     }
 
     return pricingPlan;
+  }
+
+  async changePlanPosition(
+    planId: number,
+    data: ChangePlanOrderDto,
+  ): Promise<PricingPlan> {
+    const { newPosition } = data;
+
+    const pricingPlans = await this.pricingPlanRepository.find({
+      order: { planOrder: 'ASC' },
+    });
+
+    if (!pricingPlans) {
+      throw new NotFoundException(`There is no plans in the database`);
+    }
+
+    let finalPosition = pricingPlans[pricingPlans.length - 1].planOrder;
+
+    if (newPosition > finalPosition) {
+      throw new BadRequestException(
+        `The new position is higher than the last position in the database`,
+      );
+    }
+
+    const editedOrderPlan = await this.pricingPlanRepository.findOne({
+      where: { id: planId },
+    });
+
+    for (const pricingPlan of pricingPlans) {
+      if (pricingPlan.planOrder === newPosition) {
+        pricingPlan.planOrder = editedOrderPlan.planOrder;
+        await pricingPlan.save();
+      }
+    }
+
+    editedOrderPlan.planOrder = newPosition;
+    await editedOrderPlan.save();
+
+    return editedOrderPlan;
   }
 }
