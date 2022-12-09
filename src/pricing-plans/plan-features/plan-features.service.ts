@@ -82,4 +82,30 @@ export class PlanFeaturesService {
 
     return editedFeatures;
   }
+
+  async deletePlanFeature(featureId: number): Promise<string> {
+    const planFeature = await this.planFeaturesRepository.findOne({
+      where: { id: featureId },
+    });
+
+    if (!planFeature) {
+      throw new NotFoundException(
+        `There is no Feature with the id: ${featureId} in the database`,
+      );
+    }
+
+    await this.planFeaturesRepository.delete(featureId);
+
+    const allFeatures = await this.planFeaturesRepository.find({
+      where: { pricingPlanId: planFeature.pricingPlanId },
+      order: { featureOrder: 'ASC' },
+    });
+
+    for (const [index, feature] of allFeatures.entries()) {
+      feature.featureOrder = index + 1;
+      await feature.save();
+    }
+
+    return `The feature: ${planFeature.feature}, was successfully deleted`;
+  }
 }

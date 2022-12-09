@@ -80,4 +80,9 @@ export class PricingPlanController {
   ) {
     return await this.planFeaturesService.editPlanFeatures(editPlanFeaturesDto);
   }
+
+  @Delete('/features/:featureId')
+  async deletePlanFeature(@Param('featureId') featureId: number) {
+    return await this.planFeaturesService.deletePlanFeature(featureId);
+  }
 }
