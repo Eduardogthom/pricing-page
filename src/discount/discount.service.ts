@@ -18,53 +18,48 @@ export class DiscountService {
 
   async createDiscount(body: CreateDiscountDto): Promise<Discount> {
     const { discountValue, discountType } = body;
-    try {
-      const hasDiscountType = await this.discountRepository.findOne({
-        where: {
-          discountType: discountType ? discountType : DiscountType.ANNUAL,
-        },
-      });
 
-      if (hasDiscountType) {
-        throw new ConflictException(
-          discountType
-            ? 'There is already a discount with this type in the database'
-            : 'There is already a default annualy discount in the database',
-        );
-      }
+    const hasDiscountType = await this.discountRepository.findOne({
+      where: {
+        discountType: discountType ? discountType : DiscountType.ANNUAL,
+      },
+    });
 
-      const discountData = this.discountRepository.create({
-        discountValue,
-        discountType,
-      });
-
-      const createdDiscount = await this.discountRepository.save(discountData);
-
-      return createdDiscount;
-    } catch (error) {
-      console.log(error);
+    if (hasDiscountType) {
+      throw new ConflictException(
+        discountType
+          ? 'There is already a discount with this type in the database'
+          : 'There is already a default annualy discount in the database',
+      );
     }
+
+    const discountData = this.discountRepository.create({
+      discountValue,
+      discountType,
+    });
+
+    const createdDiscount = await this.discountRepository.save(discountData);
+
+    return createdDiscount;
   }
 
   async editDiscount(body: EditDiscountDto): Promise<Discount> {
     const { discountType, discountValue } = body;
-    try {
-      const discount = await this.discountRepository.findOne({
-        where: { discountType },
-      });
+    const discount = await this.discountRepository.findOne({
+      where: {
+        discountType: discountType ? discountType : DiscountType.ANNUAL,
+      },
+    });
 
-      if (!discount) {
-        throw new NotFoundException(
-          `There is no discount with the type: ${discountType} in the database`,
-        );
-      }
-
-      discount.discountValue = discountValue;
-      await discount.save();
-
-      return discount;
-    } catch (error) {
-      console.log(error);
+    if (!discount) {
+      throw new NotFoundException(
+        `There is no discount with the type: ${discountType} in the database`,
+      );
     }
+
+    discount.discountValue = discountValue;
+    await discount.save();
+
+    return discount;
   }
 }

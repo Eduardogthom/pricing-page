@@ -11,7 +11,7 @@ export class CreateDiscountDto {
 }
 
 export class EditDiscountDto {
-  @IsNotEmpty()
+  @IsOptional()
   discountType: DiscountType;
 
   @IsNotEmpty()

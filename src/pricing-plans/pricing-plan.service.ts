@@ -40,6 +40,7 @@ export class PricingPlanService {
       });
 
       if (!discount) {
+        console.log('Creating a default annual discount');
         const discountData = this.discountRepository.create({
           discountValue: 20,
           discountType: DiscountType.ANNUAL,
@@ -100,50 +101,56 @@ export class PricingPlanService {
     body: EditNewPricingPlanDto,
   ): Promise<PricingPlan> {
     const { name, price, planFeatures } = body;
-    try {
-      const pricingPlan = await this.pricingPlanRepository.findOne({
-        where: { id: planId },
-      });
+    const pricingPlan = await this.pricingPlanRepository.findOne({
+      where: { id: planId },
+    });
 
-      if (!Object.keys(body).length) {
-        throw new BadRequestException('Nothing to edit here');
-      }
-
-      if (name) {
-        pricingPlan.name = name;
-      }
-
-      if (price) {
-        pricingPlan.price = price;
-      }
-
-      await pricingPlan.save();
-
-      if (planFeatures) {
-        await this.planFeaturesRepository
-          .createQueryBuilder('pf')
-          .delete()
-          .from(PlanFeatures)
-          .where('pricingPlanId = :planId', { planId })
-          .execute();
-
-        for (const [index, feature] of planFeatures.entries()) {
-          await this.planFeaturesRepository.save({
-            pricingPlan,
-            feature,
-            featureOrder: index + 1,
-          });
-        }
-      }
-
-      const planWithFeatures = await this.pricingPlanRepository.findOne({
-        where: { id: pricingPlan.id },
-        relations: ['features'],
-      });
-
-      return planWithFeatures;
-    } catch (error) {
-      console.log(error);
+    if (!pricingPlan) {
+      throw new NotFoundException(
+        `There is no Pricing Plan with the id: ${planId} in the database`,
+      );
     }
+
+    if (!Object.keys(body).length) {
+      throw new BadRequestException('Nothing to edit here');
+    }
+
+    if (!name && !price && planFeatures.length === 0) {
+      throw new BadRequestException('Nothing to edit here');
+    }
+
+    if (name) {
+      pricingPlan.name = name;
+    }
+
+    if (price) {
+      pricingPlan.price = price;
+    }
+
+    await pricingPlan.save();
+
+    if (planFeatures.length > 0) {
+      await this.planFeaturesRepository
+        .createQueryBuilder('pf')
+        .delete()
+        .from(PlanFeatures)
+        .where('pricingPlanId = :planId', { planId })
+        .execute();
+
+      for (const [index, feature] of planFeatures.entries()) {
+        await this.planFeaturesRepository.save({
+          pricingPlan,
+          feature,
+          featureOrder: index + 1,
+        });
+      }
+    }
+
+    const planWithFeatures = await this.pricingPlanRepository.findOne({
+      where: { id: pricingPlan.id },
+      relations: ['features'],
+    });
+
+    return planWithFeatures;
   }
 }
