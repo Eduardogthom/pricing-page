@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Discount } from 'src/discount/discount.entity';
 import { Repository } from 'typeorm';
 import { PlanFeatures } from './plan-features/plan-features.entity';
 import {
@@ -11,6 +12,7 @@ import {
   EditNewPricingPlanDto,
 } from './pricing-plan.dto';
 import { PricingPlan } from './pricing-plan.entity';
+import { DiscountType } from './pricing-plan.enums';
 
 @Injectable()
 export class PricingPlanService {
@@ -19,6 +21,8 @@ export class PricingPlanService {
     private pricingPlanRepository: Repository<PricingPlan>,
     @InjectRepository(PlanFeatures)
     private planFeaturesRepository: Repository<PlanFeatures>,
+    @InjectRepository(Discount)
+    private discountRepository: Repository<Discount>,
   ) {}
 
   findAll(): Promise<PricingPlan[]> {
@@ -28,6 +32,22 @@ export class PricingPlanService {
   async createPricingPlan(body: CreateNewPricingPlanDto): Promise<PricingPlan> {
     const { name, price, planFeatures } = body;
     try {
+      let discount: Discount;
+      discount = await this.discountRepository.findOne({
+        where: {
+          discountType: DiscountType.ANNUAL,
+        },
+      });
+
+      if (!discount) {
+        const discountData = this.discountRepository.create({
+          discountValue: 20,
+          discountType: DiscountType.ANNUAL,
+        });
+
+        discount = await this.discountRepository.save(discountData);
+      }
+
       const lastPlan = await this.pricingPlanRepository
         .createQueryBuilder('pp')
         .orderBy('planOrder', 'DESC')
@@ -37,6 +57,7 @@ export class PricingPlanService {
         name,
         price,
         planOrder: lastPlan ? lastPlan.planOrder + 1 : 1,
+        discount,
       });
 
       const pricingPlan = await this.pricingPlanRepository.save(plan);
@@ -50,7 +71,7 @@ export class PricingPlanService {
       }
       const planWithFeatures = await this.pricingPlanRepository.findOne({
         where: { id: pricingPlan.id },
-        relations: ['features'],
+        relations: ['features', 'discount'],
       });
 
       return planWithFeatures;

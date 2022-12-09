@@ -1,4 +1,13 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Patch,
+  Post,
+  Res,
+  ValidationPipe,
+} from '@nestjs/common';
+import { CreateDiscountDto, EditDiscountDto } from './discount.dto';
 import { Discount } from './discount.entity';
 import { DiscountService } from './discount.service';
 
@@ -6,13 +15,17 @@ import { DiscountService } from './discount.service';
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}
 
-  // @Post()
-  // async editAnuallyDiscount(@Res() response, @Body() discount: Discount) {
-  //   const newPricingPlan = await this.discountService.createPlanFeatures(
-  //     discount,
-  //   );
-  //   return response.status(HttpStatus.CREATED).json({
-  //     newPricingPlan,
-  //   });
-  // }
+  @Post()
+  async createPricingPlan(
+    @Body(ValidationPipe) createDiscountDto: CreateDiscountDto,
+  ) {
+    return await this.discountService.createDiscount(createDiscountDto);
+  }
+
+  @Patch('edit')
+  async editPricingPlan(
+    @Body(ValidationPipe) editDiscountDto: EditDiscountDto,
+  ) {
+    return await this.discountService.editDiscount(editDiscountDto);
+  }
 }

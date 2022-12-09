@@ -1,3 +1,4 @@
+import { Discount } from 'src/discount/discount.entity';
 import {
   Entity,
   Column,
@@ -6,9 +7,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { PlanFeatures } from './plan-features/plan-features.entity';
-import { PlanOrderEnum } from './pricing-plan.enums';
 
 @Entity()
 export class PricingPlan extends BaseEntity {
@@ -26,6 +27,12 @@ export class PricingPlan extends BaseEntity {
 
   @OneToMany(() => PlanFeatures, (feature) => feature.pricingPlan)
   features: PlanFeatures[];
+
+  @Column()
+  discountId: number;
+
+  @ManyToOne(() => Discount)
+  discount: Discount;
 
   @Column()
   @CreateDateColumn()
