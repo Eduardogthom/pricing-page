@@ -168,6 +168,7 @@ export class PricingPlanService {
   async getAllPlans(): Promise<PricingPlan[]> {
     const pricingPlans = await this.pricingPlanRepository.find({
       relations: ['features', 'discount'],
+      order: { planOrder: 'ASC', features: { featureOrder: 'ASC' } },
     });
 
     if (!pricingPlans) {
